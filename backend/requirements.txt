@@ -7,3 +7,4 @@ cryptography==42.0.8
 gunicorn==22.0.0
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
+pqcrypto==0.3.1

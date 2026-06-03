@@ -1,4 +1,4 @@
-﻿import os
+import os
 from flask import Flask, render_template
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -41,15 +41,18 @@ def create_app():
         inspector = inspect(db.engine)
         if 'file_metadata' in inspector.get_table_names():
             column_names = {column['name'] for column in inspector.get_columns('file_metadata')}
-            if 'encrypted_file_data' not in column_names:
-                db.session.execute(
-                    text(
-                        "ALTER TABLE file_metadata "
-                        "ADD COLUMN encrypted_file_data BYTEA NOT NULL DEFAULT '\\x'::bytea"
-                    )
-                )
-                db.session.commit()
-
+            migration_statements = {
+                'encrypted_file_data': "ALTER TABLE file_metadata ADD COLUMN encrypted_file_data BYTEA NOT NULL DEFAULT '\\x'::bytea",
+                'key_wrap_scheme': "ALTER TABLE file_metadata ADD COLUMN key_wrap_scheme VARCHAR(50) DEFAULT 'RSA-OAEP'",
+                'pqc_algorithm': "ALTER TABLE file_metadata ADD COLUMN pqc_algorithm VARCHAR(50)",
+                'pqc_kem_ciphertext': "ALTER TABLE file_metadata ADD COLUMN pqc_kem_ciphertext BYTEA",
+                'pqc_wrap_nonce': "ALTER TABLE file_metadata ADD COLUMN pqc_wrap_nonce BYTEA",
+                'pqc_wrapped_aes_key': "ALTER TABLE file_metadata ADD COLUMN pqc_wrapped_aes_key BYTEA",
+            }
+            for column_name, statement in migration_statements.items():
+                if column_name not in column_names:
+                    db.session.execute(text(statement))
+            db.session.commit()
     @app.route('/')
     def index():
         return render_template('login.html')
