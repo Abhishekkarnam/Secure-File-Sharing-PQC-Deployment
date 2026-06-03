@@ -1,3 +1,4 @@
+const API_BASE = "https://your-app-name.up.railway.app";
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');
     return token ? { 'Authorization': `Bearer ${token}` } : {};
